@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useCollection } from "react-firebase-hooks/firestore";
 import {
@@ -28,8 +28,10 @@ import AttachFile from "@mui/icons-material/AttachFile";
 import Message from "./Message";
 import InsertEmoticon from "@mui/icons-material/InsertEmoticon";
 import { Mic } from "@mui/icons-material";
+import TimeAgo from "timeago-react";
 
 const ChatScreen = ({ messages, chat }) => {
+
   const [user] = useAuthState(auth);
   const router = useRouter();
   const recipientEmail = getRecipientEmail(chat.users, user);
@@ -37,6 +39,7 @@ const ChatScreen = ({ messages, chat }) => {
     userCollectionRef,
     where("email", "==", recipientEmail)
   );
+
   const [recipientSnapShot] = useCollection(recipientRef);
   const recipient = recipientSnapShot?.docs?.[0]?.data();
   const myDoc = doc(database, "chats", router.query.id);
@@ -57,15 +60,8 @@ const ChatScreen = ({ messages, chat }) => {
         />
       ));
     }
-    // else {
-    //   return JSON.parse(messages).map((message) => (
-    //     <Message key={message.id} user={message.user} message={message} />
-    //   ));
-    // }
-    else {
-      return;
-    }
   };
+
   const sendMessage = async (e) => {
     e.preventDefault();
     await setDoc(doc(userCollectionRef, user.uid), {
@@ -79,7 +75,13 @@ const ChatScreen = ({ messages, chat }) => {
     });
     setInput("");
   };
+
   const [input, setInput] = useState("");
+  ;
+  console.log("messages",new  Date(messages[messages?.length-1].timestamp*1000).toLocaleTimeString("en-US", {timeZone: "Asia/Kolkata"}));
+  console.log("size", messages?.length);
+
+
   return (
     <Container>
       <Header>
@@ -90,7 +92,18 @@ const ChatScreen = ({ messages, chat }) => {
         )}
         <HeaderInformation>
           <h3>{recipientEmail}</h3>
-          <p>Last seen: </p>
+          {recipient ? (
+            <p>
+              Last active:{" "}
+              {recipient?.lastSeen?.toDate() ? (
+                <TimeAgo datetime={recipient?.lastSeen?.toDate()} />
+              ) : (
+                "Unavailable"
+              )}
+            </p>
+          ) : (
+            <p>Loading Last Active...</p>
+          )}
         </HeaderInformation>
         <HeaderIcons>
           <IconButton>
