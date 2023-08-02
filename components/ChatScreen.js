@@ -78,9 +78,6 @@ const ChatScreen = ({ messages, chat }) => {
 
   const [input, setInput] = useState("");
   ;
-  console.log("messages",new  Date(messages[messages?.length-1].timestamp*1000).toLocaleTimeString("en-US", {timeZone: "Asia/Kolkata"}));
-  console.log("size", messages?.length);
-
 
   return (
     <Container>
